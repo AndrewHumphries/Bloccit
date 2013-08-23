@@ -31,14 +31,10 @@ class PostsController < ApplicationController
     @post = Post.find(params[:id])
     if @post.update_attributes(params[:post])
       flash[:notice] = "Post was updated."
-      redirect to @post
+      redirect_to @post
     else
       flash[:error] = "There was an error saving the post. Please try again."
       render :new
     end
-  end
-
-
-  def edit
   end
 end
