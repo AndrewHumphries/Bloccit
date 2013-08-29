@@ -1,11 +1,11 @@
 class TopicsController < ApplicationController
   def index
     @topics = Topic.all
-    authorize! :create, @topic, message: "You need to be an admin to do that."
   end
 
   def new
     @topic = Topic.new
+    authorize! :create, @topic, message: "You need to be an admin to do that."
   end
 
   def show
