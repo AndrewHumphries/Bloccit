@@ -6,6 +6,10 @@ Made with my mentor at [Bloc](http://bloc.io)
 
 Production URL: http://andrewhumphries-bloccit.herokuapp.com
 
+## Setup
+Copy the "config/application.example.yml" file and remove "example". Your application.yml should contain your sensitive credentials. It should be included in .gitnore as well.
+
+
 == Welcome to Rails
 
 Rails is a web-application framework that includes everything needed to create
