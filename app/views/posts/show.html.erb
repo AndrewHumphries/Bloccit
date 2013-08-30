@@ -11,7 +11,7 @@
       
     
     <p><%= markdown @post.body %></p>
-    <%= image_tag(@post.image) if @post.image? %>
+    <%= image_tag(@post.image_url) if @post.image? %>
   </div>
   <div class="span4">
     <%if can? :edit, @post %>
