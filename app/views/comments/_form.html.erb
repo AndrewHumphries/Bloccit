@@ -10,11 +10,14 @@
     </div>
   <% end %>
   <%= control_group_tag(comment.errors[:body]) do %> 
-    <%= f.label :body, class: 'control_label' %>
-    <div class="controls">
+  <div class="controls">
+    <div class="text-center">
       <%= f.text_field :body%>
     </div>
+    </div>
   <% end %>
+  <div class="text-center">
       <%= f.submit "Comment" %>
+  </div>
 <% end %>
 
