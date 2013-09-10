@@ -1,0 +1,280 @@
+BASIC RAILS APP CHECKPOINT
+
+First, had to create a new Rails application — within the command line: 
+## $ cd [directory where you want the app]
+## $ rails new [name of program] -d postgresql -T
+    A) -d indicates the database platform that it will default to;
+    B) -T option specifies app will NOT use standard unit test packages. Don't need them because I'm going to write RSpec. 
+
+  Next, change the README from a .rdoc to a .md (markdown)
+  ## $ mv README.rdoc REDME.md
+
+  Next, configure the database. When we ran "rails new", we got a database.yml file. A yammel file "specifies the configuration of the databases that will interact with your app."
+
+  Remove the lines in the yammel related to a username/password; we'll just be using the default database user
+  Then, back in terminal, create the database:
+  ## $rake db:create
+
+  STATIC PAGES CHECKPOINT
+
+  Rails works on a MODEL — VIEW — CONTROLLER Format. View is the equivalent to a webpage; controller determines what view should be shown. 
+
+  When you create a controller, you create the associated views as well. To do this, just get into your app directory and: 
+  ## $ rails g controller welcome index about
+  Created a welcome controller and two corresponding views (index & about)
+
+  If you open up the welcome_controller, you're going to see two automatically created methods: index and about. These are methods that serve the purpose to invoke the view, so you have to name them after the corresponding view. 
+
+  If you open up the views, you see placeholders:
+
+#<h1>Welcome#index</h1>
+#<p>Find me in app/views/welcome/index.html.erb</p>
+
+When we ran the controller generator, another thing happened — it created code in bloccit/config/routes.rb. If you open that up, you'll see:
+
+Bloccit::Application.routes.draw do
+  get "welcome/index"
+
+  get "welcome/about"
+end
+
+This is basic HTTP protocol to create "get" routes for index/about pages. HTTP protocol has four primary actions: GET, POST, PUT and DELETE. GET allows a user to retrieve the information identified by the URL. Without a GET action in Routes, the user would not be able to see the HTML in the view. We're going to add one route: 
+
+Bloccit::Application.routes.draw do
+  get "welcome/index"
+
+  get "welcome/about"
+
+  root to: 'welcome#index'
+end
+
+The root method declares the default page (so where a user goes when typing in home page URL). 
+Also need to delete the default Rails page: 
+## $ rm public/index.html
+
+Can always check our routes by typing rake routes from command line:
+
+$ rake routes
+welcome_index GET    /welcome/index(.:format)  welcome#index
+welcome_about GET    /welcome/about(.:format)  welcome#about
+         root        /                         welcome#index
+
+First column = route name. 
+Second column = associated HTTP action. 
+Third column = URL pattern. 
+Fourth column = route destination (controller & associated view)
+
+HTML CHECKPOINT
+
+HTML = code that a browser can interpret/display as a webpage. This is basic HTML (from Index View): 
+## <h1>Welcome#index</h1>
+## <p>Find me in app/views/welcome/index.html.erb</p>
+
+HTML is the syntax between the < >. The formats (like h1) specify how it's rendered. What's in the middle is what's going to be displayed.
+
+The views have html.erb extensions — that means we can code with both HTML & Ruby. 
+
+Alright, let's update application.html.erb. This is part of the views/layouts directory, and it's invoked as a container for every view in the application & contains information that is needed on every page of the application. (So, like, the title bar could go here...?) What's basically happening:
+
+1. A view is requested;
+2. The controller corresponding to that view invokes 'application.html.erb';
+3. application.html.erb invokes the appropriate view via yield; 
+4. The complate web page is rendered & returned. 
+(QUESTION)
+
+So, the code we stick into application,html.erb, it's meant to contain all the other HTML code that could be rendered by views in the app. 
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bloccit</title>
+  <%= stylesheet_link_tag    "application", :media => "all" %>
+  <%= javascript_include_tag "application" %>
+  <%= csrf_meta_tags %>
+</head>
+<body>
+
+    <ul>
+        <li><%= link_to "Home", welcome_index_path %></li>
+        <li><%= link_to "About", welcome_about_path %></li>
+    </ul>
+
+    <%= yield %>
+
+</body>
+</html>
+
+Check that yield method. Presence of the % says "THIS IS RUBY SYNTAX. USE IT!" If it has the +, it's going to print the result of the code to the screen (it'll render it as HTML). A couple of other things: 
+<ul> creates a bulleted (unordered) list — <li> denotes a list item. 
+link_to is a method available in rails, and it returns a 'qualified HTML hyper link' (an anchor tag). So:
+
+link_to "Home", welcome_index_path will render <a href="/welcome/index">Home</a> It's got two arguments — a string, which will be the display name, and "welcome_index_path", which is actually ANOTHER Rails method, generated by the routes file. Adding _path to a route name lets Rails read it as /welcome/index. 
+
+CSS CHECKPOINT
+
+CSS = Cascading Style Sheets. It's syntax used to style and position HTML elements on a web page. 
+
+CSS is made of selectors, properties and values. 
+
+Selector designates the HTML tag to be modified. 
+
+h1 {
+  color: red;
+}
+
+This is a piece of code we modified in welcome.css.scss (another thing the rails g controller created for us); every controller has a corresponding style sheet. So, in that piece of CSS, I selected all h1 elements. h1 { } is the selector. 
+
+What if I only want to style specific h1's? id selectors and class selectors. 
+
+The simple one, the one I just did — that's the tag selector. HTML element followed by {}. An ID selector is when I want to do a unique sytling so:
+
+h1 {
+  color: red;
+}
+
+p#index-title {
+  text-align: center;
+  font-size: 15px;
+  color: blue;
+}
+
+If I add this to my style sheet, and add this to my index view:
+
+<h1>Welcome to Bloccit</h1>
+<p id="index-title">This is the home page for Bloccit.</p>
+
+Then I've basically said, find anything with the id "index-title" and specify it in this specific way. Or, I could create a class:
+
+.posts {
+  border: solid;
+  margin: 5px;
+  padding: 5px;
+  height: 200px;
+}
+
+So, now add to the index view: 
+
+<h1>Welcome to Bloccit</h1>
+<p id="index-title">This is the home page for Bloccit.</p>
+
+<div class="posts">Post 1 goes here.</div>
+<div class="posts">Post 2 goes here.</div>
+
+Anything in the posts class gets that styling. Everything in that post class css is based on the box model (margin, border, padding, content). Every HTML element has a box model. 
+
+Since CSS is sort of specialized, lots of people download and institute a framework (like Twitter Bootstrap).It provides layouts, forms, buttons, icons, Javascript functions, & more. Install it by adding it to the gem file:
+
+group :assets do
+  gem 'sass-rails',   '~> 3.2.3'
+  gem 'coffee-rails', '~> 3.2.1'
+  gem 'bootstrap-sass', '~> 2.3.1.0'
+  gem 'uglifier', '>= 1.0.3'
+end
+
+Then run the bundle:
+
+## $ bundle install
+
+Then rename application .css to application.css.scss and remove everything in there. Replace it with:
+@import "bootstrap";
+
+Almost all of my CSS will go in the application.css.scss, not the controller-specific. Now, I can start using Bootstrap provided elements, like container and nav nav-tabs. From views/layouts/application:
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bloccit</title>
+    <%= stylesheet_link_tag    "application", :media => "all" %>
+    <%= javascript_include_tag "application" %>
+    <%= csrf_meta_tags %>
+  </head>
+  <body>
+    <div class="container">
+      <ul class="nav nav-tabs">
+        <li><%= link_to "Bloccit", welcome_index_path %></li>
+        <li><%= link_to "About", welcome_about_path %></li>
+      </ul>
+
+      <%= yield %>
+    </div>
+
+  </body>
+</html>
+
+(Remove the CSS I put on the controller specific welcome.css.scss, as well as the HTML changes I made in index view.) Finally, do some blackbox Javascript stuff. In app/assets/javascripts/application.js:
+
+//= require jquery
+//= require jquery_ujs
+//= require bootstrap
+//= require_tree .
+
+MODELS CHECKPOINT
+
+Models are the classes in the application that we want to persist. So, for a reddit-style blog, you'll need Post and Comment classes. 
+
+Models save and retrieve data from the database. So, a model usually represents a table in the database. A post model is going to be tied to a post table in the database that includes things like the post's title & body. Models determine what information gets in/out of the database. 
+
+Controllers should only handle requests – all of the 'business logic' should be in the models. 
+
+Note: model is singular and table name is plural. 
+
+Intermission: probably a decent idea to be working off branches in git:
+## $ git checkout -b [branch name]
+
+Before you create a model, think about what users need to do with it. For the Post model and corresponding database table, users need to be able to submit posts with titles and bodies (descriptions). 
+## $ rails g model Post title:string body:text
+      invoke  active_record
+      create    db/migrate/20130430152108_create_posts.rb
+      create    app/models/post.rb
+Model generator did two things — built a migration file and a post.rb file. The post.rb file is the Post class (model). The migration file is everything we need to create a corresponding posts table in the database. 
+
+We also coded what form the attributes will take — title is a string, body is text data. This is different than Ruby data types — string is a one-line Ruby string, text field is multi-line Ruby string. Can do same thing for comments:
+
+## rails g model Comment body:text post:references
+  invoke  active_record
+      create    db/migrate/20130430152927_create_comments.rb
+      create    app/models/comment.rb
+
+  Every model in a Rails app gets an id attribute to uniquely identify it. To relate two models, you've got to exchange id's. The id of one model becomes a 'foreign key' when it's used as an attribute in another model. So, the Comment model needs to have an attribute named post_id; post_id attribute is there sot aht a comment can belong to a post. Multiple comments will have the same post_id. Because I include post:references when I ran the generator for the Comments model, it was already there. 
+
+  If you check out the db/migrate files created, they'll look how you expect:
+
+  # comments migration
+
+class CreateComments < ActiveRecord::Migration
+  def change
+    create_table :comments do |t|
+      t.text :body
+      t.references :post
+
+      t.timestamps
+    end
+    add_index :comments, :post_id
+  end
+end
+
+When you $ rake db:migrate, it'll create these tables in the database. And, in corresponding models, you'll see the corresponding attributes:
+
+class Post < ActiveRecord::Base
+  attr_accessible :body, :title
+end
+
+Accessible attributes here are one's users can modify. I should modify it to explicate the relationships I want:
+
+class Post < ActiveRecord::Base
+  has_many :comments
+  attr_accessible :body, :title
+end
+
+Similarly, in the Comments model, we see:
+
+class Comment < ActiveRecord::Base
+  belongs_to :post
+  attr_accessible :body
+end
+
+(The belongs_to is already there because of the way I generated the model.)
+
+
+
+

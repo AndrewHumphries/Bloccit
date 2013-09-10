@@ -1,8 +1,8 @@
 require 'faker'
 
-#create 15 topics
+#create 60 topics
 topics = []
-15.times do 
+10.times do 
   topics << Topic.create(
     name: Faker::Lorem.words(rand(1..10)).join(" "),
     description: Faker::Lorem.paragraph(rand(1..4))
@@ -19,21 +19,33 @@ rand(4..10).times do
   u.skip_confirmation!
   u.save 
 
-  rand(5..12).times do
+  rand(40..75).times do
     topic = topics.first #grabs the first topic
     p = u.posts.create(
+      topic: topic,
       title: Faker::Lorem.words(rand(1..10)).join(" "),
       body: Faker::Lorem.paragraphs(rand(1..4)).join("\n"))
     #set the created_at to a time within the past year
     p.update_attribute(:created_at, Time.now - rand(600..315360000))
+    
+
     topics.rotate! #moves first topic to last so next posts gets a different topic
 
-    rand(3..7).times do
-      p.comments.create(
-        body: Faker::Lorem.paragraphs(rand(1..2)).join("\n"))
-    end
+
   end
 end
+
+posts = Post.all
+User.all.each do |u|
+  rand(50..70).times do
+    c = posts.first.comments.build(
+      body: Faker::Lorem.paragraphs(rand(1..2)).join("\n"))
+    c.user = u
+    c.save
+    posts.rotate!
+  end
+end
+
 
 u = User.new(
   name: 'Admin User',

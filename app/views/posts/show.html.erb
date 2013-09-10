@@ -12,6 +12,10 @@
     
     <p><%= markdown @post.body %></p>
     <%= image_tag(@post.image_url) if @post.image? %>
+    <%= render @comments %>
+    <% if current_user %>
+      <%= render partial: 'comments/form', locals: { topic: @topic, post: @post, comment: @comment } %>
+    <% end %>
   </div>
   <div class="span4">
     <%if can? :edit, @post %>
