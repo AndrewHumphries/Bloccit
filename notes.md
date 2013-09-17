@@ -23,7 +23,7 @@ First, had to create a new Rails application — within the command line:
   ## $ rails g controller welcome index about
   Created a welcome controller and two corresponding views (index & about)
 
-  If you open up the welcome_controller, you're going to see two automatically created methods: index and about. These are methods that serve the purpose to invoke the view, so you have to name them after the corresponding view. 
+  If you open up the welcome_controller, you're going to see two automatically created methods: index and about. These are methods that invoke the view, so you have to name them after the corresponding view. 
 
   If you open up the views, you see placeholders:
 
@@ -104,7 +104,7 @@ So, the code we stick into application,html.erb, it's meant to contain all the o
 </body>
 </html>
 
-Check that yield method. Presence of the % says "THIS IS RUBY SYNTAX. USE IT!" If it has the +, it's going to print the result of the code to the screen (it'll render it as HTML). A couple of other things: 
+Check that yield method. Presence of the % says "THIS IS RUBY SYNTAX. USE IT!" If it has the =, it's going to print the result of the code to the screen (it'll render it as HTML). A couple of other things: 
 <ul> creates a bulleted (unordered) list — <li> denotes a list item. 
 link_to is a method available in rails, and it returns a 'qualified HTML hyper link' (an anchor tag). So:
 
@@ -143,7 +143,7 @@ If I add this to my style sheet, and add this to my index view:
 <h1>Welcome to Bloccit</h1>
 <p id="index-title">This is the home page for Bloccit.</p>
 
-Then I've basically said, find anything with the id "index-title" and specify it in this specific way. Or, I could create a class:
+Then I've basically said, find anything with the id "index-title" and style it in this specific way. Or, I could create a class:
 
 .posts {
   border: solid;
@@ -180,26 +180,26 @@ Then rename application .css to application.css.scss and remove everything in th
 
 Almost all of my CSS will go in the application.css.scss, not the controller-specific. Now, I can start using Bootstrap provided elements, like container and nav nav-tabs. From views/layouts/application:
 
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Bloccit</title>
-    <%= stylesheet_link_tag    "application", :media => "all" %>
-    <%= javascript_include_tag "application" %>
-    <%= csrf_meta_tags %>
-  </head>
-  <body>
-    <div class="container">
-      <ul class="nav nav-tabs">
-        <li><%= link_to "Bloccit", welcome_index_path %></li>
-        <li><%= link_to "About", welcome_about_path %></li>
-      </ul>
+# <!DOCTYPE html>
+# <html>
+# <head>
+#    <title>Bloccit</title>
+#    <%= stylesheet_link_tag    "application", :media => "all" %>
+#    <%= javascript_include_tag "application" %>
+#    <%= csrf_meta_tags %>
+#  </head>
+#  <body>
+#    <div class="container">
+#      <ul class="nav nav-tabs">
+#        <li><%= link_to "Bloccit", welcome_index_path %></li>
+#        <li><%= link_to "About", welcome_about_path %></li>
+#      </ul>
 
-      <%= yield %>
-    </div>
+#      <%= yield %>
+#    </div>
 
-  </body>
-</html>
+#  </body>
+#</html>
 
 (Remove the CSS I put on the controller specific welcome.css.scss, as well as the HTML changes I made in index view.) Finally, do some blackbox Javascript stuff. In app/assets/javascripts/application.js:
 
@@ -212,7 +212,7 @@ MODELS CHECKPOINT
 
 Models are the classes in the application that we want to persist. So, for a reddit-style blog, you'll need Post and Comment classes. 
 
-Models save and retrieve data from the database. So, a model usually represents a table in the database. A post model is going to be tied to a post table in the database that includes things like the post's title & body. Models determine what information gets in/out of the database. 
+Models save and retrieve data from the database. So, a model usually represents a table in the database. A post model is going to be tied to a posts table in the database that includes things like the post's title & body. Models determine what information gets in/out of the database. 
 
 Controllers should only handle requests – all of the 'business logic' should be in the models. 
 
@@ -235,7 +235,7 @@ We also coded what form the attributes will take — title is a string, body is 
       create    db/migrate/20130430152927_create_comments.rb
       create    app/models/comment.rb
 
-  Every model in a Rails app gets an id attribute to uniquely identify it. To relate two models, you've got to exchange id's. The id of one model becomes a 'foreign key' when it's used as an attribute in another model. So, the Comment model needs to have an attribute named post_id; post_id attribute is there sot aht a comment can belong to a post. Multiple comments will have the same post_id. Because I include post:references when I ran the generator for the Comments model, it was already there. 
+  Every model in a Rails app gets an id attribute to uniquely identify it. To relate two models, you've got to exchange id's. The id of one model becomes a 'foreign key' when it's used as an attribute in another model. So, the Comment model needs to have an attribute named post_id; post_id attribute is there so that a comment can belong to a post. Multiple comments will have the same post_id. Because I include post:references when I ran the generator for the Comments model, it was already there. 
 
   If you check out the db/migrate files created, they'll look how you expect:
 
@@ -275,6 +275,226 @@ end
 
 (The belongs_to is already there because of the way I generated the model.)
 
+RAILS CONSOLE CHECKPOINT
+
+Rails console is the space within the terminal where I can execute code. It's the irb (the Ruby console) with the Rails environment loaded. Launch it once you're in App directory:
+
+# $ rails c
+
+I can do things like create database records from my terminal:
+
+# > Post.create(title: "First post", body: "Body of first")
+
+Post.create calls the create method on the Post class. Creates a new row in the database, and inserts what's passed as arguments into that row. 
+
+Arguments passed were the title and body. Passed them as a Hash — Keys are symbols corresponding to attribute names in the model, values are what I set the attributes to (passed as strings). 
+
+This is what happens when we click submit on a post. 
+
+Let's say I wanted to retrieve that row. 
+# > p = _
+
+This is shorthand — I assigned the variable 'p' to the last returned object in the console (basically, "_" is last returned object). 
+
+So, if I go: 
+
+# > p
+
+I'll print the information associated with the row I just created. I can continue to manipulate this post: 
+
+# p.comments.create(body: "First comment!")
+
+Called the create method on the Comments class, for the post 'p.' So, console creates a comment row, populated with the post_id, which we extracted from the p variable. 
+
+(This comments method was dynamically created by Rails because of has_many: comments in the Post model.)
+
+Then, to print comments:
+
+>p.comments
+
+A lot of this is hinging on my models inheriting the methods from the class Active Record. If you look at the top of a model, you'll see:
+
+# class Post < ActiveRecord::Base
+
+Provides methods like create, as well as first. Within the console:
+
+# > c = Comment.first
+
+Assigned the first comment in the database to the variable 'c.' I can also use Ruby syntax in the console:
+
+# > p.comments.each { |comment| p comment.body } 
+
+I'm going to iterate over every comment instance for 'p' in the database, and call the method body on it (printing the body). 
+
+SEED DATA CHECKPOINT
+
+I don't want to manually seed a bunch of data in my development environment. It's nice to be able to just drop a large amount of data. 
+
+Include Faker in my Gemfile:
+
+# gem 'faker'
+
+Make sure I'm in the app directory and then: 
+
+# $ bundle install
+
+Open up db/seeds.rb, remove all the commented lines. seeds.rb is a script that will seed my database. Then, add:
+
+# require 'faker' 
+
+#rand(10..30).times do
+  # p = Post.create(title: Faker::Lorem.words(rand(1..10)).join(" "), body: Faker:Lorem.paragraphs(rand(1..4)).join("\n"))
+  # rand(3..10).times do
+  #   p.comments.create(body: Faker::Lorem.paragraphs(rand(1..2)).join("\n"))
+  #  end
+#end
+
+#puts "Seed finished" 
+#puts "#{Post.count} posts created"
+#puts "#{Comment.count} comments created"
+
+This is Ruby code. It's relying on the Faker API to call methods like 'words' and 'paragraphs.' Still using 'create' methods, but not passing explicit values — having the Faker module create the data. 
+
+'rand' method runs a random number (designated by the range passed). The script then calls 'times' in order to call the create method that many times (rand provides the number for times). 
+
+Within the command line I can run seeds.rb thusly: 
+#$ rake db:seed
+
+I can check around using the Active Record method find, again in the rails console (rails c)
+#> p = Post.find(3)
+
+The argument passed is the post ID. Can also check around with the count method: 
+#> p.comments.count
+
+CRUD
+
+It's time to create some resources. A resource is a term that describes all of the components around an object. So, a Post resource in Bloccit will consist of a model, controller, views & routes. I've got the model, so time to create the posts_controller. Get onto a new git branch and: 
+
+#$ rails g controller Posts index show new edit
+
+I passed five arguments. First, the resource name (Posts). The generator method then created some stuff for all of the other arguments: 
+
+#create  app/controllers/posts_controller.rb
+#       route  get "posts/edit"
+#       route  get "posts/new"
+#       route  get "posts/show"
+#       route  get "posts/index"
+#      invoke  erb
+#      create    app/views/posts
+#      create    app/views/posts/index.html.erb
+#      create    app/views/posts/show.html.erb
+#      create    app/views/posts/new.html.erb
+#      create    app/views/posts/edit.html.erb
+#      invoke  helper
+#      create    app/helpers/posts_helper.rb
+#      invoke  assets
+#      invoke    coffee
+#      create      app/assets/javascripts/posts.js.coffee
+#      invoke    scss
+#      create      app/assets/stylesheets/posts.css.scss
+
+And, if I look in routes.rb:
+
+#Bloccit::Application.routes.draw do
+#
+#  get "posts/edit"
+#  get "posts/new"
+#  get "posts/show"
+#  get "posts/index"
+
+#  get "welcome/index"
+#  get "welcome/about"
+
+#  root :to => 'welcome#index'
+#end
+
+I'm going to replace these with more succinct code. I'll call the resources method, passing a symbol. When I do this, it'll tell Rails to create routes for every CRUD action. So, my new routes.rb file:
+
+#Bloccit::Application.routes.draw do
+
+#  resources :posts
+
+#  match "about" => 'welcome#about', via: :get
+
+#  root :to => 'welcome#index'
+#end
+
+If I run rake routes again:
+
+    posts GET    /posts(.:format)          posts#index
+          POST   /posts(.:format)          posts#create
+ new_post GET    /posts/new(.:format)      posts#new
+edit_post GET    /posts/:id/edit(.:format) posts#edit
+     post GET    /posts/:id(.:format)      posts#show
+          PUT    /posts/:id(.:format)      posts#update
+          DELETE /posts/:id(.:format)      posts#destroy
+    about GET    /about(.:format)          welcome#about
+     root        /                         welcome#index
 
 
+Ok, so what's CRUD? 
 
+CRUD = create-read-update-delete. The actions are aligned with controller actions in a Rails app. Get = read, Post = create, Put = update, delete = delete. These routes exist for the Post object when I raked. These are all the types of Post requests a user can make. 
+
+I changed the about and index paths, so I need to update my application layout: app/views/layouts/application.html.erb: 
+
+#<li><%= link_to "Bloccit", root_path %></li>
+#<li><%= link_to "About", about_path %> </li>
+
+Ok, now I can start my rails and then plug: localhost:3000/posts into my browser. I can see the default HTML created by the controller generator. Now, how can I get it to show some real data? 
+
+Go to app/controllers/posts_controller.rb. Where I was just looking, that's the index page. I know this because, from rake routes:
+
+  posts GET    /posts(.:format)          posts#index
+
+See how that is indicating localhost:3000/posts. If I want to show dynamic data, I've got to modify the index view in the posts_controller. 
+
+# class PostsController < ApplicationController
+# def index
+#   @posts = Post.all
+# end
+
+I created an instance variable, and assigned it a collection of Post objects using the Active Record 'all' method. all returns an array of whatever I call it on (Post objects). 
+
+If I create an instance variable in a controller method, I can use it in the associated view. Since @posts was created and assigned in the index method, I can use it in the index view. Clean out index.html.erb and:
+
+#<h1>All Posts</h1>
+#<% @posts.each do |post| %> 
+#  <p><%= link_to post.title, post %></p>
+#<% end %> 
+
+Ok. So I've got the each method. Inside the each block, I create a link for each post instance. The arguments passed to link_to are built using the post instance (the block argument). Note that when an object, like the post instance, is passed to link_to (instead of a URL being passed), Rails will automatically extract the object id & use the class name to figure out the route to return. So, link_to returns this route: 
+
+ post GET    /posts/:id(.:format)      posts#show
+
+ This is a little 'Whoa.' 
+
+ If I check out localhost:3000/posts, I'll see the data. Format is not good though. Clean it up with bootstrap. This is in the index view:
+
+ # <h1>All Posts</h1>
+#  <% @posts.each do |post| %> 
+      <div class="media">
+        <div class="media-body">
+          <h4 class="media-heading">
+            <%= link_to post.title, post %> 
+          </h4>
+        </div>
+      </div>
+    <% end %>
+
+  Alright, if I click on a Post link, I get taken to a new view. Evaluating rake routes, it should be clear that this is the show view. This is still boilerplate HTML, so I've got to update the show method (in the posts_controller), and then the show view. 
+
+  #def show
+    @post = Post.find(params[:id])
+  end
+
+  The show method declares an instance variable named @post and assigns it to the retun of Post.find(params[:id]).
+
+  I don't know what Post a user clicks on, so I can't some predict the ID. I have to get it from the request the user makes. Rails has a params hash that gets passed around on every request. It can be populated with different stuff, but in this case it's got my post id. I'm specifying the key of the hash (:id), and getting the value back (the actual post id). 
+
+  Note — this isn't a collection, it's a single Post instance. Different than index method. 
+
+  Ok, now fix the show view:
+
+  # <h1><%= @post.title %></h1>
+    <p><%= @post.body %></p>

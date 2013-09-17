@@ -8,6 +8,7 @@ class Ability
         if user.role? :member #what can members do? 
             can :manage, Post, :user_id => user.id #manage their own posts
             can :manage, Comment, :user_id => user.id #comment
+            can :create, Vote
         end
 
         if user.role? :moderator #what can mods do?

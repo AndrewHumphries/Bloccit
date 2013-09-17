@@ -28,6 +28,7 @@ rand(4..10).times do
     #set the created_at to a time within the past year
     p.update_attribute(:created_at, Time.now - rand(600..315360000))
     
+    p.update_rank
 
     topics.rotate! #moves first topic to last so next posts gets a different topic
 
