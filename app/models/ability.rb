@@ -9,6 +9,7 @@ class Ability
             can :manage, Post, :user_id => user.id #manage their own posts
             can :manage, Comment, :user_id => user.id #comment
             can :create, Vote
+            can :manage, Favorite, user_id: user.id
         end
 
         if user.role? :moderator #what can mods do?
