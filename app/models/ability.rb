@@ -10,6 +10,7 @@ class Ability
             can :manage, Comment, :user_id => user.id #comment
             can :create, Vote
             can :manage, Favorite, user_id: user.id
+            can :read, Topic
         end
 
         if user.role? :moderator #what can mods do?
@@ -21,7 +22,9 @@ class Ability
             can :manage, :all #manage every object in the system
         end
         
-        can :read, :all #this is what guests can do
+        
+        can :read, Topic, public: true
+        can :read, Post 
     end
  end
     # The first argument to `can` is the action you are giving the user 
