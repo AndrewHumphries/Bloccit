@@ -80,7 +80,6 @@ Alright, let's update application.html.erb. This is part of the views/layouts di
 2. The controller corresponding to that view invokes 'application.html.erb';
 3. application.html.erb invokes the appropriate view via yield; 
 4. The complate web page is rendered & returned. 
-(QUESTION)
 
 So, the code we stick into application,html.erb, it's meant to contain all the other HTML code that could be rendered by views in the app. 
 
@@ -287,7 +286,7 @@ I can do things like create database records from my terminal:
 
 Post.create calls the create method on the Post class. Creates a new row in the database, and inserts what's passed as arguments into that row. 
 
-Arguments passed were the title and body. Passed them as a Hash — Keys are symbols corresponding to attribute names in the model, values are what I set the attributes to (passed as strings). 
+Arguments passed were the title and body. Passed them as a Hash — keys are symbols corresponding to attribute names in the model, values are what I set the attributes to (passed as strings). 
 
 This is what happens when we click submit on a post. 
 
@@ -498,3 +497,174 @@ Ok. So I've got the each method. Inside the each block, I create a link for each
 
   # <h1><%= @post.title %></h1>
     <p><%= @post.body %></p>
+
+    MORE CRUD
+
+    So, posts can be viewed, but a user can't create them. I need to build a 'form' — a group of HTML elements that provide a place for a user to input data. 
+
+    link_to is the helper method for generating HTML needed for a hyperlink; 
+    In same way, form_for is going to generate the HTML needed for a form. 
+
+    Ok, what's my form's purpose? Collect posts' title and body, submit to the server so it can be saved in database. Essentially, creating a new Post object. 
+
+    First, I need a controller action. Open posts_controller and build a 'new' method. 
+
+    def new
+      @post = Post.new
+    end
+
+    Now I have an instance variable which is representing an empty Post object (Post.new). Now, I can access that on the related view (app/views/posts/new.html.erb) and add some code: 
+
+<%= form_for @post do |f| %>
+  <%= f.label :title %>
+  <%= f.text_field :title %>
+
+  <%= f.label :body %>
+  <%= f.text_area :body %>
+
+  <%= f.submit "Save" %>
+<% end %>
+
+But when I click Save? Unknown action — The action 'create' could not be found for PostsController. So, go do that: 
+
+def create
+  @post = Post.new(params[:post])
+  if @post.save
+    flash[:notice] = "Post was saved."
+    redirect_to @post
+  else
+    flash[:error] = "There was an error saving the post. Please try again."
+    render :new
+  end
+end
+
+Notice here — "new" method just creates an empty instance of Post, which gets presented to the user on the app/views/posts/new.html.erb view. When the user clicks save, the "create" method is called, and either updates the database with the save method or returns an error. 
+
+"create" does not have a corresponding view — there's nothing for the user to do/see. It's working to collect the data submitted and updata the database. 
+
+Notice that params hash. Unlike in show, where the method used params to rab the value of an id, here the params hash is grabbing a value associated with the :post key. The value of the :post key is actually another hash, populated with the data submitted by the user in the form (the tital enad body fields). 
+
+Once I assign @post with the value of params[:post], I call the 'save' method — an Active Record method that updates the database. Based on whether or not this works, I populate the flash hash with key :notice and the corresponding vale (a string that says whether or not everything got saved). 
+
+Then, I called redirect_to, passing it the @post object. It extracts the id from @ post and builds the URL, sends me over there.
+
+Now, I can do a little style work on the "New" view. 
+
+app/views/posts/new.html.erb
+
+<h1>New Post</h1>
+
+<div class="row">
+  <div class="span-6">
+    <p>Guidelines for new posts:</p>
+    <ul>
+      <li>Make sure content is appropriate.</li>
+      <li>Blah blah blah</li>
+      <li>Blah blah blah</li>
+      <li>Blah blah blah</li>
+    </ul>
+  </div>
+  <div class="span-6">
+    <%= form_for @post, html: { class: 'form-horizontal' } do |f| %>
+      <div class="control-group">
+        <%= f.label :title, class: 'control-label' %>
+        <div class="controls">
+          <%= f.text_field :title %>
+        </div>
+      </div>
+      <div class="control-group">
+        <%= f.label :body, class: 'control-label' %>
+        <div class="controls">
+          <%= f.text_area :body, rows: 8 %>
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="controls">
+          <%= f.submit "Save", class: 'btn' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+New view corresponds to the 'create' action, Edit view corresponds to the 'update' action. I need to add edit and update to the posts_controller. 
+
+def edit
+    @post = Post.find(params[:id])
+end
+
+def update
+  @post = Post.find(params[:id])
+  if @post.update_attributes(params[:post])
+    flash[:notice] = "Post was updated."
+    redirect_to @post
+  else
+    flash[:error] = "There was an error saving the post. Please try again."
+    render :new
+  end
+end
+
+Very similar to new and create methods I just wrote. Now, I need to update the edit view to display a form. 
+
+<h1>Edit Post</h1>
+<div class="row">
+  <div class="span-6">
+    <p>Guidelines for new posts:</p>
+    <ul>
+      <li>Make sure content is appropriate.</li>
+      <li>Blah blah blah</li>
+      <li>Blah blah blah</li>
+      <li>Blah blah blah</li>
+    </ul>
+  </div>
+  <div class="span-6">
+    <%= form_for @post, html: { class: 'form-horizontal' } do |f| %>
+      <div class="control-group">
+        <%= f.label :title, class: 'control-label' %>
+        <div class="controls">
+          <%= f.text_field :title %>
+        </div>
+      </div>
+      <div class="control-group">
+        <%= f.label :body, class: 'control-label' %>
+        <div class="controls">
+          <%= f.text_area :body, rows: 8 %>
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="controls">
+          <%= f.submit "Save", class: 'btn' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+You probably want to edit from the 'show' page, so I can add a link there. 
+
+<h1><%= @post.title %></h1>
+
+<%= link_to "Edit", edit_post_path(@post), class: 'btn btn-mini' %>
+
+<p><%= @post.body %></p>
+
+Up to this point, my flash messages aren't actually working. I haven't included them in a view. Every view may need a flash message at some point, so it makes sense to put it in my unverisal spot — application.html.erb
+
+app/views/layouts/application.html.erb and add: 
+
+      <% if flash[:notice] %>
+        <div class="alert alert-success">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <%= flash[:notice] %>
+        </div>
+      <% elsif flash[:error] %>
+        <div class="alert alert-error">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <%= flash[:error] %>
+        </div>
+      <% elsif flash[:alert] %>
+        <div class="alert">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <%= flash[:alert] %>
+        </div>
+      <% end %>

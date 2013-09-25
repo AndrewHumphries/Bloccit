@@ -1,0 +1,14 @@
+<h1>Edit Post</h1>
+<div class="row">
+  <div class="span4">
+    <p>Guidelines for editing posts:</p>
+      <ul>
+        <li> Even when you edit, keep it APPROPRIATE.</li>
+        <li> SERIOUSLY.</li>
+      </ul>
+  </div>
+  <div class="span8">
+    <%= render partial: 'form', locals: { topic: @topic, post: @post } %>
+  </div>
+</div>
+
